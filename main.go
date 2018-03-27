@@ -22,6 +22,8 @@ func main(){
 		password	= os.Getenv("MAIN_DB_PASSWORD")
 		collection	= os.Getenv("MAIN_DB_COLLECTION")
 		inputPath 	= os.Getenv("FILE_INPUT")
+
+		newFileName = "test-merge-2017"
 	)
 
 	info := &mgo.DialInfo{
@@ -42,5 +44,7 @@ func main(){
 	err = col.Find(bson.M{"ANIO":2017}).All(&mgoResult)
 	utils.Check(err)
 	utils.Log.Println(len(mgoResult), " documents to be merged")
-	merger.Merger(inputPath, "test-merge-2017.csv", mgoResult)
+	merger.Merger(inputPath, newFileName + ".csv", mgoResult)
+
+	zipper.Zipper(newFile + ".zip", )
 }
