@@ -65,5 +65,7 @@ func Merger(inputPath string, filename string, files[]models.Declarations){
 		utils.Check(err)
 
 		utils.Log.Print(entryNum, "/", total, ": ", "finished")
+
+		file.Close()
 	}
 }
