@@ -17,7 +17,7 @@
 .env*
 
 # Temporary files
-tmp/*
+test-*
 
 # Log files
 *.log

@@ -53,5 +53,5 @@ func main(){
 	err = col.Find(bson.M{"ANIO":2017}).All(&mgoResult)
 	check(err)
 	utils.Log.Println(mgoResult)
-	merger.Merger(inputPath, "merge-2017.csv", mgoResult)
+	merger.Merger(inputPath, "test-merge-2017.csv", mgoResult)
 }
