@@ -17,4 +17,10 @@
 .env*
 
 # Temporary files
-tmp/*
+test-*
+
+# Log files
+*.log
+
+# Simulated input
+input/*

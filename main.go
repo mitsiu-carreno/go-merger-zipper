@@ -5,33 +5,23 @@ import(
 	"os"
 	"time"
 	"github.com/mitsiu-carreno/go-merger-zipper/utils"
+	"github.com/mitsiu-carreno/go-merger-zipper/merger"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	models "github.com/mitsiu-carreno/go-merger-zipper/declarations"
 )
-
-type declarations struct{
-	_id 	string `bson:"_id,omitempty"`
-	ANIO	string `bson:"ANIO"`
-	ARCHIVO string `bson:"ARCHIVO"`
-}
-
-func check(e error){
-	if e != nil{
-		utils.Log.Println(e)
-		panic(e)
-	}
-}
 
 func main(){
 	var logpath = flag.String("logpath", os.Getenv("LOG_FILE"), "Log Path")
 	utils.NewLog(*logpath)
-
+	// DATABASE
 	var (
 		hosts 		= os.Getenv("MAIN_DB_HOST")
 		database	= os.Getenv("MAIN_DB_DB")
 		username	= os.Getenv("MAIN_DB_USER")
 		password	= os.Getenv("MAIN_DB_PASSWORD")
 		collection	= os.Getenv("MAIN_DB_COLLECTION")
+		inputPath 	= os.Getenv("FILE_INPUT")
 	)
 
 	info := &mgo.DialInfo{
@@ -43,17 +33,14 @@ func main(){
 	}
 
 	session, err := mgo.DialWithInfo(info)
-	check(err)
+	utils.Check(err)
 	defer session.Close()
 
 	col := session.DB(database).C(collection)
 
-	count, err := col.Count()
-	check(err)
-	utils.Log.Println(count, " documents found")
-
-	var mgoResult []declarations
-	err = col.Find(bson.M{"DIA":2017}).All(&mgoResult)
-	check(err)
-	utils.Log.Println(mgoResult)
+	var mgoResult []models.Declarations
+	err = col.Find(bson.M{"ANIO":2017}).All(&mgoResult)
+	utils.Check(err)
+	utils.Log.Println(len(mgoResult), " documents to be merged")
+	merger.Merger(inputPath, "test-merge-2017.csv", mgoResult)
 }
