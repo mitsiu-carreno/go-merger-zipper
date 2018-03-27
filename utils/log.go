@@ -12,7 +12,6 @@ var (
 
 // NewLog creates a file on the specified path and writes all logs there
 func NewLog(logpath string){
-	println("Log file: " + logpath)
 
 	file, err := os.Create(logpath)
 	if err != nil{

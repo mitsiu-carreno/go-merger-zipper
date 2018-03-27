@@ -21,3 +21,6 @@ tmp/*
 
 # Log files
 *.log
+
+# Simulated input
+input/*

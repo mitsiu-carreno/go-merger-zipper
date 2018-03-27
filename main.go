@@ -5,25 +5,11 @@ import(
 	"os"
 	"time"
 	"github.com/mitsiu-carreno/go-merger-zipper/utils"
+	"github.com/mitsiu-carreno/go-merger-zipper/merger"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	models "github.com/mitsiu-carreno/go-merger-zipper/declarations"
 )
-
-type declarations struct{
-	_id 			string `bson:"_id,omitempty"`
-	ANIO			string `bson:"ANIO"`
-	INDICE 			string `bson:"INDICE"`
-	ACUSE			string `bson:"ACUSE"`
-	FECHA			string `bson:"FECHA"`
-	DEPENDENCIA		string `bson:"DEPENDENCIA"`
-	DIA				string `bson:"DIA"`
-	DECLARACION		string `bson:"DECLARACION"`
-	SOURCE			string `bson:"SOURCE"`
-	MES				string `bson:"MES"`
-	ARCHIVO 		string `bson:"ARCHIVO"`
-	NOMBRE			string `bson:"NOMBRE"`
-	FOLDER			string `bson:"FOLDER"`
-}
 
 func check(e error){
 	if e != nil{
@@ -35,13 +21,14 @@ func check(e error){
 func main(){
 	var logpath = flag.String("logpath", os.Getenv("LOG_FILE"), "Log Path")
 	utils.NewLog(*logpath)
-
+	// DATABASE
 	var (
 		hosts 		= os.Getenv("MAIN_DB_HOST")
 		database	= os.Getenv("MAIN_DB_DB")
 		username	= os.Getenv("MAIN_DB_USER")
 		password	= os.Getenv("MAIN_DB_PASSWORD")
 		collection	= os.Getenv("MAIN_DB_COLLECTION")
+		inputPath 	= os.Getenv("FILE_INPUT")
 	)
 
 	info := &mgo.DialInfo{
@@ -62,8 +49,9 @@ func main(){
 	check(err)
 	utils.Log.Println(count, " documents found")
 
-	var mgoResult []declarations
+	var mgoResult []models.Declarations
 	err = col.Find(bson.M{"ANIO":2017}).All(&mgoResult)
 	check(err)
 	utils.Log.Println(mgoResult)
+	merger.Merger(inputPath, "merge-2017.csv", mgoResult)
 }
