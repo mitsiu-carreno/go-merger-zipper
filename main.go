@@ -11,13 +11,6 @@ import(
 	models "github.com/mitsiu-carreno/go-merger-zipper/declarations"
 )
 
-func check(e error){
-	if e != nil{
-		utils.Log.Println(e)
-		panic(e)
-	}
-}
-
 func main(){
 	var logpath = flag.String("logpath", os.Getenv("LOG_FILE"), "Log Path")
 	utils.NewLog(*logpath)
@@ -40,18 +33,14 @@ func main(){
 	}
 
 	session, err := mgo.DialWithInfo(info)
-	check(err)
+	utils.Check(err)
 	defer session.Close()
 
 	col := session.DB(database).C(collection)
 
-	count, err := col.Count()
-	check(err)
-	utils.Log.Println(count, " documents found")
-
 	var mgoResult []models.Declarations
 	err = col.Find(bson.M{"ANIO":2017}).All(&mgoResult)
-	check(err)
-	utils.Log.Println(mgoResult)
+	utils.Check(err)
+	utils.Log.Println(len(mgoResult), " documents to be merged")
 	merger.Merger(inputPath, "test-merge-2017.csv", mgoResult)
 }

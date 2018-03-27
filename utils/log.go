@@ -17,5 +17,5 @@ func NewLog(logpath string){
 	if err != nil{
 		panic(err)
 	}
-	Log = log.New(file, "", log.LstdFlags|log.Lshortfile)
+	Log = log.New(file, "", log.LstdFlags)
 }
