@@ -32,14 +32,15 @@ func getRow(file io.Reader) (ch chan[]string){
 func Merger(inputPath string, outputPath string, filename string, files[]models.Declarations){
 	var total = len(files)
 
+	// Check if output directory exists
 	_, err := os.Stat(outputPath)
 	if os.IsNotExist(err){
-
 		os.MkdirAll(outputPath, os.ModePerm)
 	}else{
 		utils.Check(err)
 	}
 
+	// Create new file
 	outfile, err := os.Create(outputPath + filename)
 	utils.Check(err)
 	defer outfile.Close()
@@ -47,14 +48,17 @@ func Merger(inputPath string, outputPath string, filename string, files[]models.
 
 	writter := csv.NewWriter(outfile)
 
+	// Write headers in new file
 	err = writter.Write([]string{"OBSERVACIONES","INDICE","NOMBRE","DEPENDENCIA","DECLARACION","FECHA","ACUSE","TEMA","SUBTEMA","VALOR"})
 	utils.Check(err)
 
 	for i, entry := range files{
 		var entryNum = i+1
+
+		// Check if input file exists
 		_, err := os.Stat(inputPath + entry.ARCHIVO)
 		if os.IsNotExist(err){
-			utils.Log.Print(entryNum, "/", total, ": File not found ", entry.ARCHIVO, "\n")
+			utils.Log.Print(entryNum, "/", total, ": Merge - File not found ", entry.ARCHIVO, "\n")
 			continue
 		}
 		utils.Check(err)
@@ -68,12 +72,13 @@ func Merger(inputPath string, outputPath string, filename string, files[]models.
 			utils.Check(err)
 		}
 
+		// Clean variables
 		writter.Flush()
 		err = writter.Error()
 		utils.Check(err)
 
 		utils.Log.Print(entryNum, "/", total, ": ", "finished")
-
+		// Closed here to avoid overload mem
 		file.Close()
 	}
 }

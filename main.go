@@ -8,6 +8,7 @@ import(
 	"strconv"
 	"github.com/mitsiu-carreno/go-merger-zipper/utils"
 	"github.com/mitsiu-carreno/go-merger-zipper/merger"
+	"github.com/mitsiu-carreno/go-merger-zipper/zipper"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	models "github.com/mitsiu-carreno/go-merger-zipper/declarations"
@@ -57,7 +58,8 @@ func main(){
 	for _, year := range mgoDistinctYears{
 
 		var newFileName = "Decl-" + strconv.Itoa(year)
-		var outputPath = "./output/csv/annual/"
+		var mergedPath = "./output/csv/annual/"
+		var zippedPath = "./output/zip/annual/"
 
 		fmt.Println("Merging", newFileName)
 		utils.Log.Println("Merging", newFileName)
@@ -67,8 +69,12 @@ func main(){
 		utils.Check(err)
 
 		utils.Log.Println(len(mgoCsvsResult), " documents to be merged")
-		merger.Merger(inputPath, outputPath, newFileName + ".csv", mgoCsvsResult)
-		
+		merger.Merger(inputPath, mergedPath, newFileName + ".csv", mgoCsvsResult)
+
+		utils.Log.Println("----------------------------------------")
+		fmt.Println("Zipping", newFileName)
+		utils.Log.Println("Zipping", newFileName)
+		zipper.Zipper(mergedPath, zippedPath, newFileName + ".zip", []string{newFileName+".csv"})
 	}
 	/*
 	var mgoCsvsResult []models.Declarations
