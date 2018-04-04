@@ -24,3 +24,6 @@ test-*
 
 # Simulated input
 input/*
+
+# Output files
+output/*

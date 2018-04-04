@@ -29,10 +29,18 @@ func getRow(file io.Reader) (ch chan[]string){
 }
 
 // Merger receives a list of csv files to merge into a single file
-func Merger(inputPath string, filename string, files[]models.Declarations){
+func Merger(inputPath string, outputPath string, filename string, files[]models.Declarations){
 	var total = len(files)
 
-	outfile, err := os.Create("./" + filename)
+	_, err := os.Stat(outputPath)
+	if os.IsNotExist(err){
+
+		os.MkdirAll(outputPath, os.ModePerm)
+	}else{
+		utils.Check(err)
+	}
+
+	outfile, err := os.Create(outputPath + filename)
 	utils.Check(err)
 	defer outfile.Close()
 	utils.Log.Println("Merge file: " + filename + " created")
@@ -46,7 +54,7 @@ func Merger(inputPath string, filename string, files[]models.Declarations){
 		var entryNum = i+1
 		_, err := os.Stat(inputPath + entry.ARCHIVO)
 		if os.IsNotExist(err){
-			utils.Log.Print(entryNum, "/", total, ": ", entry.ARCHIVO, " file not found\n")
+			utils.Log.Print(entryNum, "/", total, ": File not found ", entry.ARCHIVO, "\n")
 			continue
 		}
 		utils.Check(err)
