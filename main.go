@@ -57,32 +57,40 @@ func main(){
 	// Generate csv and zip by year
 	for _, year := range mgoDistinctYears{
 
-		var newFileName = "Decl-" + strconv.Itoa(year)
+		var fileName = "Decl-" + strconv.Itoa(year)
 		var mergedPath = "./output/csv/annual/"
 		var zippedPath = "./output/zip/annual/"
 
-		fmt.Println("Merging", newFileName)
-		utils.Log.Println("Merging", newFileName)
-
-		var mgoCsvsResult []models.Declarations
-		err = col.Find(bson.M{"ANIO" : year}).All(&mgoCsvsResult)
+		var files []models.Declarations
+		err = col.Find(bson.M{"ANIO" : year}).All(&files)
 		utils.Check(err)
 
-		utils.Log.Println(len(mgoCsvsResult), " documents to be merged")
-		merger.Merger(inputPath, mergedPath, newFileName + ".csv", mgoCsvsResult)
+		mergeZip(fileName, inputPath, files, mergedPath, zippedPath)
 
-		utils.Log.Println("----------------------------------------")
-		fmt.Println("Zipping", newFileName)
-		utils.Log.Println("Zipping", newFileName)
-		zipper.Zipper(mergedPath, zippedPath, newFileName + ".zip", []string{newFileName+".csv"})
+		// Generate csv and zip by dependency/year
+		for _, dependency := range mgoDistinctDependencies{
+			var fileName = "Decl-" + dependency + "-" + strconv.Itoa(year)
+			var mergedPath = "./output/csv/dep/"
+			var zippedPath = "./output/zip/dep/"
+
+			var files []models.Declarations
+			err = col.Find(bson.M{"ANIO" : year, "DEPENDENCIA": dependency}).All(&files)
+			utils.Check(err)
+
+			mergeZip(fileName, inputPath, files, mergedPath, zippedPath)
+		}
 	}
-	/*
-	var mgoCsvsResult []models.Declarations
-	err = col.Find(bson.M{"ANIO":2017}).All(&mgoResult)
-	utils.Check(err)
-	utils.Log.Println(len(mgoCsvsResult), " documents to be merged")
-	merger.Merger(inputPath, newFileName + ".csv", mgoCsvsResult)
+}
 
-	zipper.Zipper(newFile + ".zip", )
-	*/
+func mergeZip(fileName string, inputPath string, files []models.Declarations, mergedPath string, zippedPath string){
+	fmt.Println("Merging", fileName)
+	utils.Log.Println("Merging", fileName)
+
+	utils.Log.Println(len(files), " documents to be merged")
+	merger.Merger(inputPath, mergedPath, fileName + ".csv", files)
+
+	utils.Log.Println("----------------------------------------")
+	fmt.Println("Zipping", fileName)
+	utils.Log.Println("Zipping", fileName)
+	zipper.Zipper(mergedPath, zippedPath, fileName + ".zip", []string{fileName+".csv"})
 }
