@@ -58,8 +58,8 @@ func main(){
 	for _, year := range mgoDistinctYears{
 
 		var fileName = "Decl-" + strconv.Itoa(year)
-		var mergedPath = "./output/annual/csv/"
-		var zippedPath = "./output/annual/zip/"
+		var mergedPath = "./output/csv/annual/"
+		var zippedPath = "./output/zip/annual/"
 
 		var files []models.Declarations
 		err = col.Find(bson.M{"ANIO" : year}).All(&files)
@@ -70,8 +70,8 @@ func main(){
 		// Generate csv and zip by dependency/year
 		for _, dependency := range mgoDistinctDependencies{
 			var fileName = "Decl-" + dependency + "-" + strconv.Itoa(year)
-			var mergedPath = "./output/dep/"+dependency+"/csv/"
-			var zippedPath = "./output/dep/"+dependency+"/zip/"
+			var mergedPath = "./output/csv/dependency/"+strconv.Itoa(year)+"/"
+			var zippedPath = "./output/zip/dependency/"+strconv.Itoa(year)+"/"
 
 			var files []models.Declarations
 			err = col.Find(bson.M{"ANIO" : year, "DEPENDENCIA": dependency}).All(&files)
