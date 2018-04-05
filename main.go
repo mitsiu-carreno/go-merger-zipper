@@ -57,7 +57,7 @@ func main(){
 	// Generate csv and zip by year
 	for _, year := range mgoDistinctYears{
 
-		var fileName = "Decl-" + strconv.Itoa(year)
+		var fileName = "Declaraciones_" + strconv.Itoa(year)
 		var mergedPath = "./output/csv/annual/"
 		var zippedPath = "./output/zip/annual/"
 
@@ -69,7 +69,7 @@ func main(){
 
 		// Generate csv and zip by dependency/year
 		for _, dependency := range mgoDistinctDependencies{
-			var fileName = "Decl-" + dependency + "-" + strconv.Itoa(year)
+			var fileName = "Declaraciones_" + strconv.Itoa(year) + "_" + dependency
 			var mergedPath = "./output/csv/dependency/"+strconv.Itoa(year)+"/"
 			var zippedPath = "./output/zip/dependency/"+strconv.Itoa(year)+"/"
 
