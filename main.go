@@ -54,9 +54,6 @@ func main(){
 
 	sort.Ints(mgoDistinctYears)
 
-	err = col.Find(nil).Distinct("DEPENDENCIA", &mgoDistinctDependencies)
-	utils.Check(err)
-
 	// Generate csv and zip by year
 	for _, year := range mgoDistinctYears{
 
@@ -73,6 +70,11 @@ func main(){
 		}else{
 			fmt.Println("Skipping (No documents found)", fileName)
 		}
+
+		err = col.Find(bson.M{"ANIO": year}).Distinct("DEPENDENCIA", &mgoDistinctDependencies)
+		utils.Check(err)
+
+		sort.Strings(mgoDistinctDependencies)
 
 		// Generate csv and zip by dependency/year
 		for _, dependency := range mgoDistinctDependencies{
