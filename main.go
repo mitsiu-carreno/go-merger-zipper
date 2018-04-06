@@ -4,6 +4,7 @@ import(
 	"flag"
 	"os"
 	"time"
+	"sort"
 	"fmt"
 	"strconv"
 	"github.com/mitsiu-carreno/go-merger-zipper/utils"
@@ -51,6 +52,8 @@ func main(){
 	err = col.Find(nil).Distinct("ANIO", &mgoDistinctYears)
 	utils.Check(err)
 
+	sort.Ints(mgoDistinctYears)
+
 	err = col.Find(nil).Distinct("DEPENDENCIA", &mgoDistinctDependencies)
 	utils.Check(err)
 
@@ -65,7 +68,11 @@ func main(){
 		err = col.Find(bson.M{"ANIO" : year}).All(&files)
 		utils.Check(err)
 
-		mergeZip(fileName, inputPath, files, mergedPath, zippedPath)
+		if len(files) > 0 {
+			mergeZip(fileName, inputPath, files, mergedPath, zippedPath)
+		}else{
+			fmt.Println("Skipping (No documents found)", fileName)
+		}
 
 		// Generate csv and zip by dependency/year
 		for _, dependency := range mgoDistinctDependencies{
@@ -77,20 +84,25 @@ func main(){
 			err = col.Find(bson.M{"ANIO" : year, "DEPENDENCIA": dependency}).All(&files)
 			utils.Check(err)
 
-			mergeZip(fileName, inputPath, files, mergedPath, zippedPath)
+			if len(files) > 0 {
+				mergeZip(fileName, inputPath, files, mergedPath, zippedPath)
+			}else{
+				fmt.Println("Skipping (No documents found)", fileName)
+			}
+			
 		}
 	}
 }
 
 func mergeZip(fileName string, inputPath string, files []models.Declarations, mergedPath string, zippedPath string){
-	fmt.Println("Merging", fileName)
+	fmt.Println("Working... ", fileName)
 	utils.Log.Println("Merging", fileName)
 
 	utils.Log.Println(len(files), " documents to be merged")
 	merger.Merger(inputPath, mergedPath, fileName + ".csv", files)
 
 	utils.Log.Println("----------------------------------------")
-	fmt.Println("Zipping", fileName)
+	// fmt.Println("Zipping", fileName)
 	utils.Log.Println("Zipping", fileName)
 	zipper.Zipper(mergedPath, zippedPath, fileName + ".zip", []string{fileName+".csv"})
 }
