@@ -4,16 +4,22 @@ import(
 	"flag"
 	"os"
 	"time"
+	"sort"
+	"fmt"
+	"strconv"
 	"github.com/mitsiu-carreno/go-merger-zipper/utils"
 	"github.com/mitsiu-carreno/go-merger-zipper/merger"
+	"github.com/mitsiu-carreno/go-merger-zipper/zipper"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	models "github.com/mitsiu-carreno/go-merger-zipper/declarations"
 )
 
 func main(){
+	// CONFIG LOG
 	var logpath = flag.String("logpath", os.Getenv("LOG_FILE"), "Log Path")
 	utils.NewLog(*logpath)
+
 	// DATABASE
 	var (
 		hosts 		= os.Getenv("MAIN_DB_HOST")
@@ -23,7 +29,6 @@ func main(){
 		collection	= os.Getenv("MAIN_DB_COLLECTION")
 		inputPath 	= os.Getenv("FILE_INPUT")
 
-		newFileName = "test-merge-2017"
 	)
 
 	info := &mgo.DialInfo{
@@ -40,11 +45,66 @@ func main(){
 
 	col := session.DB(database).C(collection)
 
-	var mgoResult []models.Declarations
-	err = col.Find(bson.M{"ANIO":2017}).All(&mgoResult)
-	utils.Check(err)
-	utils.Log.Println(len(mgoResult), " documents to be merged")
-	merger.Merger(inputPath, newFileName + ".csv", mgoResult)
+	var mgoDistinctYears []int
+	var mgoDistinctDependencies []string
 
-	zipper.Zipper(newFile + ".zip", )
+	// Get all years and dependencies
+	err = col.Find(nil).Distinct("ANIO", &mgoDistinctYears)
+	utils.Check(err)
+
+	sort.Ints(mgoDistinctYears)
+
+	// Generate csv and zip by year
+	for _, year := range mgoDistinctYears{
+
+		var fileName = "Declaraciones_" + strconv.Itoa(year)
+		var mergedPath = "./output/csv/annual/"
+		var zippedPath = "./output/zip/annual/"
+
+		var files []models.Declarations
+		err = col.Find(bson.M{"ANIO" : year}).All(&files)
+		utils.Check(err)
+
+		if len(files) > 0 {
+			mergeZip(fileName, inputPath, files, mergedPath, zippedPath)
+		}else{
+			fmt.Println("Skipping (No documents found)", fileName)
+		}
+
+		err = col.Find(bson.M{"ANIO": year}).Distinct("DEPENDENCIA", &mgoDistinctDependencies)
+		utils.Check(err)
+
+		sort.Strings(mgoDistinctDependencies)
+
+		// Generate csv and zip by dependency/year
+		for _, dependency := range mgoDistinctDependencies{
+			var fileName = "Declaraciones_" + strconv.Itoa(year) + "_" + dependency
+			var mergedPath = "./output/csv/dependency/"+strconv.Itoa(year)+"/"
+			var zippedPath = "./output/zip/dependency/"+strconv.Itoa(year)+"/"
+
+			var files []models.Declarations
+			err = col.Find(bson.M{"ANIO" : year, "DEPENDENCIA": dependency}).All(&files)
+			utils.Check(err)
+
+			if len(files) > 0 {
+				mergeZip(fileName, inputPath, files, mergedPath, zippedPath)
+			}else{
+				fmt.Println("Skipping (No documents found)", fileName)
+			}
+			
+		}
+	}
+}
+
+func mergeZip(fileName string, inputPath string, files []models.Declarations, mergedPath string, zippedPath string){
+	fmt.Println("Working... ", fileName)
+	utils.Log.Println("Merging", fileName)
+
+	utils.Log.Println(len(files), " documents to be merged")
+	merger.Merger(inputPath, mergedPath, fileName + ".csv", files)
+
+	utils.Log.Println("----------------------------------------")
+	// fmt.Println("Zipping", fileName)
+	utils.Log.Println("Zipping", fileName)
+	zipper.Zipper(mergedPath, zippedPath, fileName + ".zip", []string{fileName+".csv"})
 }
