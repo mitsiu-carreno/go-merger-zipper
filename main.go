@@ -52,7 +52,8 @@ func main(){
 	err = col.Find(nil).Distinct("ANIO", &mgoDistinctYears)
 	utils.Check(err)
 
-	sort.Ints(mgoDistinctYears)
+	// sort.Ints(mgoDistinctYears)
+	sort.Sort(sort.Reverse(sort.IntSlice(mgoDistinctYears)))
 
 	// Generate csv and zip by year
 	for _, year := range mgoDistinctYears{
