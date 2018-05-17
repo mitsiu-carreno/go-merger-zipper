@@ -3,7 +3,7 @@ package merger
 import (
 	"io"
 	"encoding/csv"
-	"os"
+  	"os"
 	"github.com/mitsiu-carreno/go-merger-zipper/utils"
 	models "github.com/mitsiu-carreno/go-merger-zipper/declarations"
 )
@@ -30,7 +30,7 @@ func getRow(file io.Reader) (ch chan[]string){
 
 // Merger receives a list of csv files to merge into a single file
 func Merger(inputPath string, outputPath string, filename string, files[]models.Declarations){
-	var total = len(files)
+	//var total = len(files)
 
 	// Check if output directory exists
 	_, err := os.Stat(outputPath)
@@ -44,7 +44,6 @@ func Merger(inputPath string, outputPath string, filename string, files[]models.
 	outfile, err := os.Create(outputPath + filename)
 	utils.Check(err)
 	defer outfile.Close()
-	utils.Log.Println("Merge file: " + filename + " created")
 
 	writter := csv.NewWriter(outfile)
 
@@ -52,18 +51,19 @@ func Merger(inputPath string, outputPath string, filename string, files[]models.
 	err = writter.Write([]string{"OBSERVACIONES","INDICE","NOMBRE","DEPENDENCIA","DECLARACION","FECHA","ACUSE","TEMA","SUBTEMA","VALOR"})
 	utils.Check(err)
 
-	for i, entry := range files{
-		var entryNum = i+1
+	for _, entry := range files{
+		//var entryNum = i+1
 
 		// Check if input file exists
-		_, err := os.Stat(inputPath + entry.ARCHIVO)
+		_, err := os.Stat(inputPath + entry.FOLDER + "/" + entry.ARCHIVO)
 		if os.IsNotExist(err){
-			utils.Log.Print(entryNum, "/", total, ": Merge - File not found ", entry.ARCHIVO, "\n")
+      // fmt.Println("Merge - File not found -v4", inputPath + entry.FOLDER + "/" + entry.ARCHIVO)
+			utils.Log.Print("Merge - File not found -v1", inputPath, entry.FOLDER, inputPath + entry.FOLDER + "/" + entry.ARCHIVO, "\n")
 			continue
 		}
 		utils.Check(err)
 
-		file, err := os.Open(inputPath + entry.ARCHIVO)
+		file, err := os.Open(inputPath + entry.FOLDER + "/" + entry.ARCHIVO)
 		utils.Check(err)
 		defer file.Close()
 
@@ -77,7 +77,6 @@ func Merger(inputPath string, outputPath string, filename string, files[]models.
 		err = writter.Error()
 		utils.Check(err)
 
-		utils.Log.Print(entryNum, "/", total, ": ", "finished")
 		// Closed here to avoid overload mem
 		file.Close()
 	}

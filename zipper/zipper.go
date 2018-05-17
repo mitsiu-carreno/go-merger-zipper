@@ -23,7 +23,6 @@ func Zipper(inputPath string, outputPath string, filename string, files[]string)
 	newFile, err := os.Create(outputPath + filename)
 	utils.Check(err)
 	defer newFile.Close()
-	utils.Log.Println("Zip file: " + filename + " created")
 
 	zipWritter := zip.NewWriter(newFile)
 	defer zipWritter.Close()
